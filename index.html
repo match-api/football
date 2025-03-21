@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Watchalong Overlay</title>
+    <style>
+        @font-face {
+            font-family: 'Protrakt';
+            src: url('./fonts/ProtraktVariable-ExtraBold.woff2') format('woff2'),
+                 url('./fonts/ProtraktVariable-ExtraBold.woff') format('woff');
+            font-weight: 800;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Protrakt', Arial, sans-serif;
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            background-color: green;
+        }
+        
+        /* Subscriber count */
+        .subscriber-box {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background-color: #e60000;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .channel-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #ffcc00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+        }
+        .logo-icon {
+            color: #e60000;
+            font-size: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+        .subscriber-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .subscriber-count {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .subscriber-label {
+            background-color: #cc0000;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        /* Match score display */
+        .match-container {
+            position: absolute;
+            top: 120px;
+            left: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        .competition-badge {
+            background-color: #e60000;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .competition-logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 5px;
+        }
+        .competition-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #competition-text {
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px;
+            text-transform: uppercase;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        .score-box {
+            display: flex;
+            background-color: #e60000;
+            border-radius: 10px;
+            height: 80px;
+            width: 370px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .score-display {
+            width: 80px;
+            height: 80px;
+            background-color: rgb(1, 0, 71);
+            color: rgb(255, 255, 255);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            border-radius: 10px 0 0 10px;
+        }
+        .team-name {
+            flex-grow: 1;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        .match-time {
+            display: flex;
+            width: 260px;
+            height: 50px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        .half-indicator {
+            width: 160px;
+            height: 50px;
+            background-color: #e60000;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 18px;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        .time-display {
+            width: 100px;
+            height: 50px;
+            background-color: #f0f0f0;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 24px;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        
+        /* Date display */
+        .date-display {
+            position: absolute;
+            bottom: 130px;
+            left: 30px;
+            width: 140px;
+            height: 110px;
+            background-color: #e60000;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .day-label {
+            background-color: #cc0000;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .date-number {
+            font-size: 45px;
+            font-weight: bold;
+            line-height: 1;
+            margin: 5px 0;
+        }
+        .month-label {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* Live banner */
+        .live-banner {
+            position: absolute;
+            bottom: 130px;
+            left: 180px;
+            width: 580px;
+            height: 70px;
+            background-color: #e60000;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            font-family: 'Protrakt', Arial, sans-serif;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+        
+        /* Social media */
+        .social-box {
+            position: absolute;
+            bottom: 130px;
+            left: 770px;
+            width: 180px;
+            height: 70px;
+            background-color: #e60000;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+        }
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #e60000;
+            font-weight: bold;
+            font-size: 22px;
+            margin-right: 10px;
+        }
+        .social-handle {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        /* Community vote box */
+        .community-box {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 250px;
+            height: 370px;
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .community-header {
+            background-color: #e60000;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        .community-title {
+            font-size: 13px;
+            font-weight: bold;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        .ratings-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ffdd00;
+            font-family: 'Protrakt', Arial, sans-serif;
+            font-weight: 800;
+        }
+        .qr-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            background-color: #333;
+            margin-bottom: 20px;
+        }
+        .qr-instructions {
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: #000000;
+            line-height: 1;
+        }
+        
+        /* Shop box */
+        .shop-box {
+            position: absolute;
+            bottom: 230px;
+            right: 30px;
+            width: 250px;
+            height: 170px;
+            background-color: #e60000;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 20px;
+            box-sizing: border-box;
+            line-height: 1.4;
+        }
+        
+        /* News ticker */
+        .news-ticker {
+            position: absolute;
+            bottom: 80px;
+            left: 180px;
+            display: flex;
+            width: 770px;
+            height: 40px;
+            background-color: rgb(55, 0, 117);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .ticker-label {
+            width: 80px;
+            height: 40px;
+            background-color: #610000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .ticker-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 14px;
+            color: #ffffff;
+            overflow: hidden;
+            white-space: nowrap;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .ticker-text {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+            white-space: nowrap;
+        }
+        
+        @keyframes ticker {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .lineup-box {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #e60000;
+            border-radius: 10px;
+            width: 300px;
+            color: white;
+        }
+
+        .lineup-header {
+            background: #e60000;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .lineup-title {
+            font-weight: bold;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        .lineup-content {
+            padding: 15px;
+        }
+
+        .lineup-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .player-number {
+            color: #e60000;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Subscriber count -->
+    <div class="subscriber-box">
+        <div class="channel-logo">
+            <img id="channel-logo-img" class="logo-icon" src="" alt="Channel Logo">
+        </div>
+        <div class="subscriber-info">
+            <div class="subscriber-count" id="subscribers">2,365,000</div>
+            <div class="subscriber-label">SUBSCRIBERS</div>
+        </div>
+    </div>
+    
+    <!-- Match display -->
+    <div class="match-container">
+        <div class="competition-badge" id="competition-badge">
+            <div class="competition-logo">
+                <img id="competition-logo-img" src="" alt="Competition Logo">
+            </div>
+            <div id="competition-text">Premier League</div>
+        </div>
+        
+        <!-- Team 1 Score -->
+        <div class="score-box">
+            <div class="score-display" id="score1">0</div>
+            <div class="team-name" id="team1">TEAM NAME 1</div>
+            <img id="team1-logo-img" class="logo-preview" src="" alt="Home Team Logo">
+        </div>
+        
+        <!-- Team 2 Score -->
+        <div class="score-box">
+            <div class="score-display" id="score2">0</div>
+            <div class="team-name" id="team2">TEAM NAME 2</div>
+            <img id="team2-logo-img" class="logo-preview" src="" alt="Away Team Logo">
+        </div>
+        
+        <!-- Match Time -->
+        <div class="match-time">
+            <div class="half-indicator" id="match-half">1ST HALF</div>
+            <div class="time-display" id="match-time">00:00</div>
+        </div>
+    </div>
+    
+    <!-- Date display -->
+    <div class="date-display">
+        <div class="day-label" id="day-label">FRIDAY</div>
+        <div class="date-number" id="date-number">21</div>
+        <div class="month-label" id="month-label">MAR</div>
+    </div>
+    
+    <!-- Live banner -->
+    <div class="live-banner">LIVE WATCHALONG</div>
+    
+    <!-- Social media -->
+    <div class="social-box">
+        <div class="social-icon">@</div>
+        <div class="social-handle" id="social-handle">YOURCHANNELNAME</div>
+    </div>
+    
+    <!-- Community vote box -->
+    <div class="community-box">
+        <div class="community-header">
+            <div class="community-title">COMMUNITY VOTE</div>
+            <div class="ratings-title">RATINGS!</div>
+        </div>
+        <div class="qr-container">
+            <div class="qr-code" id="qr-code"></div>
+            <div class="qr-instructions">
+                SCAN THE QR CODE TO SUBMIT<br>
+                YOUR PLAYER RATINGS FOR<br>
+                TODAY'S MATCH!
+            </div>
+        </div>
+    </div>
+    
+    <!-- Team 1 Lineup -->
+    <div class="lineup-box team1-lineup" id="team1-lineup" style="display: none;">
+        <div class="lineup-header">
+            <div class="lineup-title" id="team1-lineup-title">TEAM 1 LINEUP</div>
+        </div>
+        <div class="lineup-content">
+            <div class="lineup-list" id="team1-lineup-list"></div>
+        </div>
+    </div>
+
+    <!-- Team 2 Lineup -->
+    <div class="lineup-box team2-lineup" id="team2-lineup" style="display: none;">
+        <div class="lineup-header">
+            <div class="lineup-title" id="team2-lineup-title">TEAM 2 LINEUP</div>
+        </div>
+        <div class="lineup-content">
+            <div class="lineup-list" id="team2-lineup-list"></div>
+        </div>
+    </div>
+    
+    <!-- Shop box -->
+    <div class="shop-box" id="shop-text">
+        CHECK OUT OUR SHOP VIA THE LINK IN THE DESCRIPTION!
+    </div>
+    
+    <!-- News ticker -->
+    <div class="news-ticker">
+        <div class="ticker-label">LATEST</div>
+        <div class="ticker-content">
+            <div class="ticker-text" id="ticker-text">
+                Latest team news and updates | Welcome to our match watchalong | Join the conversation
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const subscribersElement = document.getElementById('subscribers');
+        const score1Element = document.getElementById('score1');
+        const score2Element = document.getElementById('score2');
+        const team1Element = document.getElementById('team1');
+        const team2Element = document.getElementById('team2');
+        const matchHalfElement = document.getElementById('match-half');
+        const matchTimeElement = document.getElementById('match-time');
+        const socialHandleElement = document.getElementById('social-handle');
+        const shopTextElement = document.getElementById('shop-text');
+        const tickerTextElement = document.getElementById('ticker-text');
+        const qrCodeElement = document.getElementById('qr-code');
+        const competitionBadgeElement = document.getElementById('competition-badge');
+        const competitionLogoImg = document.getElementById('competition-logo-img');
+        const channelLogoImg = document.getElementById('channel-logo-img');
+        const team1LogoImg = document.getElementById('team1-logo-img');
+        const team2LogoImg = document.getElementById('team2-logo-img');
+        const team1LineupBox = document.getElementById('team1-lineup');
+        const team2LineupBox = document.getElementById('team2-lineup');
+        const communityBox = document.querySelector('.community-box');
+        const team1LineupTitle = document.getElementById('team1-lineup-title');
+        const team2LineupTitle = document.getElementById('team2-lineup-title');
+        const shopBox = document.getElementById('shop-text');
+        
+        // Date elements
+        const dayLabelElement = document.getElementById('day-label');
+        const dateNumberElement = document.getElementById('date-number');
+        const monthLabelElement = document.getElementById('month-label');
+        
+        // Set current date
+        function updateDate() {
+            const now = new Date();
+            const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+            const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            
+            dayLabelElement.textContent = days[now.getDay()];
+            dateNumberElement.textContent = now.getDate();
+            monthLabelElement.textContent = months[now.getMonth()];
+        }
+        
+        // Initialize QR Code
+        function initQRCode(url) {
+            if (qrCodeElement) {
+                // Clear previous QR code if any
+                qrCodeElement.innerHTML = '';
+                
+                // Generate new QR code
+                new QRCode(qrCodeElement, {
+                    text: url || "https://example.com/ratings",
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        }
+        
+        // Update the competition badge function
+        function updateCompetition(competition) {
+            const competitionData = {
+                'premier-league': {
+                    text: 'Premier League',
+                    logo: './assets/logos/premier-league.png',
+                    color: '#3D195B'
+                },
+                'champions-league': {
+                    text: 'Champions League',
+                    logo: './assets/logos/champions-league.png',
+                    color: '#00235D'
+                },
+                'europa-league': {
+                    text: 'Europa League',
+                    logo: './assets/logos/europa-league.png',
+                    color: '#FF6900'
+                },
+                'fa-cup': {
+                    text: 'FA Cup',
+                    logo: './assets/logos/fa-cup.png',
+                    color: '#D4000C'
+                }
+            };
+
+            const competitionText = document.getElementById('competition-text');
+            const competitionLogoImg = document.getElementById('competition-logo-img');
+            const competitionBadgeElement = document.getElementById('competition-badge');
+
+            const defaultComp = competitionData['premier-league'];
+            const selectedComp = competitionData[competition] || defaultComp;
+
+            // Update competition text
+            competitionText.textContent = selectedComp.text;
+
+            // Update competition logo
+            competitionLogoImg.src = selectedComp.logo;
+            competitionLogoImg.alt = `${selectedComp.text} Logo`;
+
+            // Update competition badge background color
+            competitionBadgeElement.style.backgroundColor = selectedComp.color;
+        }
+        
+        // Add timer state variable
+        let currentAnimationFrame = null;
+        let isTimerRunning = false;
+
+        // Update the match time function
+        function updateMatchTime(startTime, shouldRun = true) {
+            // Cancel any existing animation
+            if (currentAnimationFrame) {
+                cancelAnimationFrame(currentAnimationFrame);
+                currentAnimationFrame = null;
+            }
+
+            // If timer should be stopped, just return
+            if (!shouldRun) {
+                isTimerRunning = false;
+                return;
+            }
+
+            isTimerRunning = true;
+            
+            function timeUpdate() {
+                if (!isTimerRunning) return;
+
+                const now = new Date().getTime();
+                const elapsed = now - startTime;
+                
+                // Convert to minutes and seconds
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                // Format with leading zeros
+                const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                matchTimeElement.textContent = formattedTime;
+                
+                // Continue animation only if timer is running
+                if (isTimerRunning) {
+                    currentAnimationFrame = requestAnimationFrame(timeUpdate);
+                }
+            }
+            
+            // Start new animation
+            timeUpdate();
+        }
+
+        // Update overlay with data
+        function updateOverlay(data) {
+            if (!data) return;
+            
+            // Update match info
+            team1Element.textContent = data.team1 || 'TEAM NAME 1';
+            team2Element.textContent = data.team2 || 'TEAM NAME 2';
+            
+            // Update lineup titles with team names
+            team1LineupTitle.textContent = `${data.team1 || 'TEAM NAME 1'} LINEUP`;
+            team2LineupTitle.textContent = `${data.team2 || 'TEAM NAME 2'} LINEUP`;
+            
+            // Update match info
+            score1Element.textContent = data.score1 || '0';
+            score2Element.textContent = data.score2 || '0';
+            matchHalfElement.textContent = data.half || '1ST HALF';
+            
+            // Update match time
+            if (data.startTime) {
+                updateMatchTime(data.startTime, data.timerRunning);
+            } else {
+                matchTimeElement.textContent = data.time || '00:00';
+            }
+            
+            // Update other elements
+            subscribersElement.textContent = data.subscribers || '2,365,000';
+            socialHandleElement.textContent = data.socialHandle || 'YOURCHANNELNAME';
+            shopTextElement.textContent = data.shopText || 'CHECK OUT OUR SHOP VIA THE LINK IN THE DESCRIPTION!';
+            tickerTextElement.textContent = data.newsTicker || 'Latest team news and updates | Welcome to our match watchalong | Join the conversation';
+            
+            // Update QR code if URL changed
+            if (data.qrUrl) {
+                initQRCode(data.qrUrl);
+            }
+            
+            // Update competition badge and logo
+            if (data.competition) {
+                updateCompetition(data.competition);
+            }
+            if (data.competitionLogo) {
+                competitionLogoImg.src = data.competitionLogo;
+            }
+
+            // Update logos
+            if (data.channelLogo) {
+                channelLogoImg.src = data.channelLogo;
+            }
+            if (data.team1Logo) {
+                team1LogoImg.src = data.team1Logo;
+            }
+            if (data.team2Logo) {
+                team2LogoImg.src = data.team2Logo;
+            }
+
+            if (data.team1Lineup) {
+                const team1LineupList = document.getElementById('team1-lineup-list');
+                team1LineupList.innerHTML = data.team1Lineup.map(player => `
+                    <div class="player-item">
+                        <span class="player-number">${player.number}</span>
+                        <span class="player-name">${player.name}</span>
+                    </div>
+                `).join('');
+            }
+        
+            if (data.team2Lineup) {
+                const team2LineupList = document.getElementById('team2-lineup-list');
+                team2LineupList.innerHTML = data.team2Lineup.map(player => `
+                    <div class="player-item">
+                        <span class="player-number">${player.number}</span>
+                        <span class="player-name">${player.name}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Event listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            // Set current date
+            updateDate();
+            
+            // Initialize QR Code
+            initQRCode();
+            
+            // Check for saved data
+            const savedData = localStorage.getItem('matchOverlayData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    updateOverlay(data);
+                    if (data.startTime) {
+                        updateMatchTime(new Date(data.startTime), data.timerRunning);
+                    }
+                } catch (error) {
+                    console.error('Error parsing saved match data:', error);
+                }
+            }
+        });
+
+        // Set up polling for data updates
+        setInterval(() => {
+            const latestData = localStorage.getItem('matchOverlayData');
+            if (latestData) {
+                try {
+                    const data = JSON.parse(latestData);
+                    updateOverlay(data);
+                    if (data.startTime) {
+                        updateMatchTime(new Date(data.startTime), data.timerRunning);
+                    }
+                } catch (error) {
+                    console.error('Error polling match data:', error);
+                }
+            }
+        }, 1000); // Check every second for updates
+
+        // Listen for match data updates
+        window.addEventListener('matchDataUpdated', (event) => {
+            updateOverlay(event.detail);
+            if (event.detail.startTime) {
+                updateMatchTime(event.detail.startTime, event.detail.timerRunning);
+            }
+        });
+
+        // Add click handlers for team names
+        team1Element.addEventListener('click', () => {
+            team2LineupBox.style.display = 'none';
+            communityBox.style.display = 'none';
+            shopBox.style.display = 'none'; // Hide shop box
+            team1LineupBox.style.display = 'block';
+        });
+        
+        team2Element.addEventListener('click', () => {
+            team1LineupBox.style.display = 'none';
+            communityBox.style.display = 'none';
+            shopBox.style.display = 'none'; // Hide shop box
+            team2LineupBox.style.display = 'block';
+        });
+        
+        // Add click handler to hide lineups and show community box and shop box
+        document.addEventListener('click', (e) => {
+            if (!team1Element.contains(e.target) && 
+                !team2Element.contains(e.target) && 
+                !team1LineupBox.contains(e.target) && 
+                !team2LineupBox.contains(e.target)) {
+                team1LineupBox.style.display = 'none';
+                team2LineupBox.style.display = 'none';
+                communityBox.style.display = 'block';
+                shopBox.style.display = 'block'; // Show shop box again
+            }
+        });
+    </script>
+</body>
+</html>
